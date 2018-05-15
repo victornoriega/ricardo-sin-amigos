@@ -11,12 +11,18 @@ int main()
 {
     char cadena[300];
     scanf("%[^\n]s",cadena);
+
     int *intArray = charArrayToIntArray(cadena);
     printf("%s\n","Cadena convertida a numeros: ");
-    for(int i=0; i< 2*strlen(cadena); i++) printf("%u", intArray[i]);
+    if(strlen(cadena)%2==0)
+        for(int i=0; i< 2*strlen(cadena); i++) printf("%u", intArray[i]);
+    else for(int i=0; i< 2*strlen(cadena)+2; i++) printf("%u", intArray[i]);
+
+
     char *charArray = intArrayToCharArray(intArray, strlen(cadena));
     printf("%s\n","\nArreglo de numeros convertido a cadena original: ");
     for(int i=0 ; i < strlen(cadena); i++) printf("%c", charArray[i]);
+
     return 0;
 }
 
@@ -30,22 +36,28 @@ int main()
 */
 
 int* charArrayToIntArray(char* c){
-    int *array = malloc(2*strlen(c)*(sizeof(int)));
+    int lengthIntArray = 2*strlen(c) +2;
+    int *array = malloc(lengthIntArray*(sizeof(int)));
     for(int i=0; i< strlen(c);i++){
         c[i] = toupper(c[i]);
-        if((int)c[i] - 64 > 9){
-            if((int)c[i]== 127){
-                array[2*i] = 2;
-                array[2*i+1] = 7;
-            }else{
-                array[2*i] = ((int)c[i]-64)/10;
-                array[2*i +1] = ((int)c[i]-64)%10;
-            }
+        if((int)c[i] == 32){
+            array[2*i] = 2;
+            array[2*i+1] = 7;
+        }
+        else if((int)c[i] - 64 > 9){
+            array[2*i] = ((int)c[i]-64)/10;
+            array[2*i +1] = ((int)c[i]-64)%10;
+
         }else{
             array[2*i] = 0;
             array[2*i+1] = (int)c[i] - 64;
         }
     }
+    if(strlen(c) %2 == 1){
+        array[lengthIntArray-2] =2;
+        array[lengthIntArray-1] =7;
+    }
+
     return array;
 }
 
@@ -53,7 +65,10 @@ char* intArrayToCharArray(int *c, int lengthIntArray){
     char *array = malloc(lengthIntArray * sizeof(char));
 
     for(int i = 0; i < lengthIntArray; i++){
-        array[i] = (char)(64 + c[2*i]*10 + c[2*i+1]);
+        if(c[2*i]==2 && c[2*i+1] ==7) array[i] = ' ';
+        else array[i] = (char)(64 + c[2*i]*10 + c[2*i+1]);
+
     }
     return array;
 }
+
