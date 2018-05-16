@@ -47,10 +47,10 @@ int main()
     int e = getE(m);
 
     int *encryptedNumber = scramble(intArray, 2*strlen(cadena)+2, e, n);
-    printf("%s\n","Cadena encriptadisima ");
+    printf("%s\n","\nCadena encriptadisima ");
     if(strlen(cadena)%2==0)
-        for(int i=0; i< 2*strlen(cadena); i++) printf("%u", intArray[i]);
-    else for(int i=0; i< 2*strlen(cadena)+2; i++) printf("%u", intArray[i]);
+        for(int i=0; i< 2*strlen(cadena); i++) printf("%u", encryptedNumber[i]);
+    else for(int i=0; i< 2*strlen(cadena)+2; i++) printf("%u", encryptedNumber[i]);
     return 0;
 }
 
@@ -104,8 +104,8 @@ char* intArrayToCharArray(int *c, int lengthCharArray, int lengthIntArray){
 
 /////////////////////////////////////////////////////////////////////////////
 int getPrime(){
-  uint64_t start = 60;
-  uint64_t stop = 90;
+  uint64_t start = 69;
+  uint64_t stop = 96;
   size_t i;
   size_t size;
   int* primes =(int*)primesieve_generate_primes(start, stop, &size, INT_PRIMES);
@@ -140,17 +140,20 @@ int getGCD(int n1, int n2){
 }
 /// LENGTH ES EL LARGO DEL ARREGLO DE NUMEROS, NO DE BLOQUES.
 int* scramble(int* a, int length, int e, int n){
+  // se declara un arreglo de bases, de la forma [[1234], [01234]]
   int base[length/4];
   for(int i = 0 ; i < length/4; i++){
     base[i] = a[4*i]*1000 + (a[4*i+1]*100) + a[4*i+2]*10 + a[4*i+3];
-    for(int j = 0 ; j < e ; j++) base[j] = (base[j] * base[j]) % n;
+    for(int j = 0 ; j < e ; j++) base[i] = (base[i] * base[i]) % n;
   }
 
   int *array = malloc(length * sizeof(int));
   for(int i = 0; i < length/4; i++){
     array[4*i] = base[i]/1000;
-    array[4*i+1] = (base[i]/100)%(array[4*i]*10);
-    array[4*i+2] = (base[i]/10)%(array[4*i]*100 + array[4*i+1]*10);
+    if(array[4*i] !=0) array[4*i+1] = (base[i]/100)%(array[4*i]*10);
+    else array[4*i+1] = base[i]/100;
+    if(array[4*i]*100 + array[4*i+1]*10!=0)array[4*i+2] = (base[i]/10)%(array[4*i]*100 + array[4*i+1]*10);
+    else array[4*i+2] = base[i]/10;
     array[4*i+3] = (base[i]) % (array[4*i]*1000 + array[4*i+1]*100 +
       array[4*i+2]*10);
   }
