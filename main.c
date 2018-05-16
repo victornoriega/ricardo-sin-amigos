@@ -21,6 +21,7 @@ int* scramble(int* a, int length, int e, int n);
 
 int getInverse(int m, int e);
 
+void printArray(int *array, int lenght);
 
 int main()
 {
@@ -31,14 +32,12 @@ int main()
 
     int *intArray = charArrayToIntArray(cadena);
     printf("%s\n","Cadena convertida a numeros: ");
-    if(strlen(cadena)%2==0)
-        for(int i=0; i< 2*strlen(cadena); i++) printf("%u", intArray[i]);
-    else for(int i=0; i< 2*strlen(cadena)+2; i++) printf("%u", intArray[i]);
-
+    printArray(intArray, strlen(cadena));
 
     char *charArray = intArrayToCharArray(intArray, strlen(cadena), 2*strlen(cadena)+2);
     printf("%s\n","\nArreglo de numeros convertido a cadena original: ");
-    for(int i=0 ; i < strlen(cadena); i++) printf("%c", charArray[i]);
+    for(int i=0 ; i < strlen(cadena); i++)
+        printf("%c", charArray[i]);
 
     int p = getPrime();
     int q = getPrime();
@@ -49,22 +48,20 @@ int main()
     int e = getE(m);
     int *encryptedNumber = scramble(intArray, 2*strlen(cadena)+2, e, n);
     printf("%s\n","\nCadena encriptadisima ");
-    if(strlen(cadena)%2==0)
-        for(int i=0; i< 2*strlen(cadena); i++) printf("%u", encryptedNumber[i]);
-    else for(int i=0; i< 2*strlen(cadena); i++) printf("%u", encryptedNumber[i]);
+    printArray(encryptedNumber, strlen(cadena));
 
     int inverse = getInverse(m,e);
 
     int *desencryptedNumber = scramble(encryptedNumber, 2*strlen(cadena)+2, inverse, n);
     printf("%s\n","\nRobando la tarjeta de credito de tus papas ");
-    if(strlen(cadena)%2==0)
-        for(int i=0; i< 2*strlen(cadena); i++) printf("%u", desencryptedNumber[i]);
-    else for(int i=0; i< 2*strlen(cadena)+2; i++) printf("%u", desencryptedNumber[i]);
+    printArray(encryptedNumber, strlen(cadena));
     printf("%s\n", "\nHackeando a juan pablo para otros mil bolas\nMensaje desencriptadisimo ");
     char *desencryptedString = intArrayToCharArray(desencryptedNumber, strlen(cadena), 2*strlen(cadena)+2);
     for(int i=0 ; i < strlen(cadena); i++) printf("%c", desencryptedString[i]);
 
     printf("%s", "\nDesvio de recursos completado con exito.\n");
+
+    puts("Gracias roberto");
 
     return 0;
 }
@@ -153,6 +150,8 @@ int getGCD(int n1, int n2){
   }
   return gcd;
 }
+
+///////////////////////////////////////////////////////////////////////////////
 /// LENGTH ES EL LARGO DEL ARREGLO DE NUMEROS, NO DE BLOQUES.
 int* scramble(int* a, int length, int e, int n){
   // se declara un arreglo de bases, de la forma [[1234], [01234]]
@@ -192,3 +191,14 @@ int getInverse(int m, int e){
   }
   return 0;
 }
+
+void printArray(int *array, int length)
+{
+    if(length%2==0)
+        for(int i=0; i< 2*length; i++)
+            printf("%u", array[i]);
+    else
+        for(int i=0; i< 2*length+2; i++)
+            printf("%u", array[i]);
+}
+
