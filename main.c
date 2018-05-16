@@ -19,11 +19,14 @@ int getGCD(int n1, int n2);
 
 int* scramble(int* a, int length, int e, int n);
 
+int getInverse(int m, int e);
+
 
 int main()
 {
     srand(time(NULL));
     char cadena[300];
+    printf("%s", "Ingresa el numero de tu tarjeta de credito seguido del numero de seguridad de la misma (no va a pasar nada (literalmente)): ");
     scanf(" %[^\n]s",cadena);
 
     int *intArray = charArrayToIntArray(cadena);
@@ -38,19 +41,31 @@ int main()
     for(int i=0 ; i < strlen(cadena); i++) printf("%c", charArray[i]);
 
     int p = getPrime();
-    uint64_t q = getPrime();
+    int q = getPrime();
     while(p==q) q=getPrime();
-
+    printf("\nGenerando primos confiables y privados (son %u y %u)",p,q);
     int n = p*q;
     int m = getLCM(p-1,q-1);
-
     int e = getE(m);
-
     int *encryptedNumber = scramble(intArray, 2*strlen(cadena)+2, e, n);
     printf("%s\n","\nCadena encriptadisima ");
     if(strlen(cadena)%2==0)
         for(int i=0; i< 2*strlen(cadena); i++) printf("%u", encryptedNumber[i]);
-    else for(int i=0; i< 2*strlen(cadena)+2; i++) printf("%u", encryptedNumber[i]);
+    else for(int i=0; i< 2*strlen(cadena); i++) printf("%u", encryptedNumber[i]);
+
+    int inverse = getInverse(m,e);
+
+    int *desencryptedNumber = scramble(encryptedNumber, 2*strlen(cadena)+2, inverse, n);
+    printf("%s\n","\nRobando la tarjeta de credito de tus papas ");
+    if(strlen(cadena)%2==0)
+        for(int i=0; i< 2*strlen(cadena); i++) printf("%u", desencryptedNumber[i]);
+    else for(int i=0; i< 2*strlen(cadena)+2; i++) printf("%u", desencryptedNumber[i]);
+    printf("%s\n", "\nHackeando a juan pablo para otros mil bolas\nMensaje desencriptadisimo ");
+    char *desencryptedString = intArrayToCharArray(desencryptedNumber, strlen(cadena), 2*strlen(cadena)+2);
+    for(int i=0 ; i < strlen(cadena); i++) printf("%c", desencryptedString[i]);
+
+    printf("%s", "\nDesvio de recursos completado con exito.\n");
+
     return 0;
 }
 
@@ -69,8 +84,8 @@ int* charArrayToIntArray(char* c){
     for(int i=0; i< strlen(c);i++){
         c[i] = toupper(c[i]);
         if((int)c[i] == 32){
-            array[2*i] = 2;
-            array[2*i+1] = 7;
+            array[2*i] = 0;
+            array[2*i+1] = 0;
         }
         else if((int)c[i] - 64 > 9){
             array[2*i] = ((int)c[i]-64)/10;
@@ -82,8 +97,8 @@ int* charArrayToIntArray(char* c){
         }
     }
     if(strlen(c) %2 == 1){
-        array[lengthIntArray-2] =2;
-        array[lengthIntArray-1] =7;
+        array[lengthIntArray-2] =0;
+        array[lengthIntArray-1] =0;
     }
 
     return array;
@@ -94,7 +109,7 @@ char* intArrayToCharArray(int *c, int lengthCharArray, int lengthIntArray){
     char *array = malloc(lengthCharArray * sizeof(char));
 
     for(int i = 0; i < lengthCharArray; i++){
-        if(c[2*i]==2 && c[2*i+1] ==7) array[i] = ' ';
+        if(c[2*i]==0 && c[2*i+1] ==0) array[i] = ' ';
         else array[i] = (char)(64 + c[2*i]*10 + c[2*i+1]);
 
     }
@@ -142,9 +157,13 @@ int getGCD(int n1, int n2){
 int* scramble(int* a, int length, int e, int n){
   // se declara un arreglo de bases, de la forma [[1234], [01234]]
   int base[length/4];
+  int b[length/4];
   for(int i = 0 ; i < length/4; i++){
-    base[i] = a[4*i]*1000 + (a[4*i+1]*100) + a[4*i+2]*10 + a[4*i+3];
-    for(int j = 0 ; j < e ; j++) base[i] = (base[i] * base[i]) % n;
+    base[i] = a[4*i]*1000 + a[4*i+1]*100 + a[4*i+2]*10 + a[4*i+3];
+    b[i]=base[i];
+    for(int j = 1; j < e ; j++) {
+      base[i] = (base[i] * b[i]) % n;
+    }
   }
 
   int *array = malloc(length * sizeof(int));
@@ -154,9 +173,22 @@ int* scramble(int* a, int length, int e, int n){
     else array[4*i+1] = base[i]/100;
     if(array[4*i]*100 + array[4*i+1]*10!=0)array[4*i+2] = (base[i]/10)%(array[4*i]*100 + array[4*i+1]*10);
     else array[4*i+2] = base[i]/10;
-    array[4*i+3] = (base[i]) % (array[4*i]*1000 + array[4*i+1]*100 +
-      array[4*i+2]*10);
+    if(array[4*i]*1000 + array[4*i+1]*100 + array[4*i+2]*10 != 0) array[4*i+3] = (base[i]) % (array[4*i]*1000 + array[4*i+1]*100 +array[4*i+2]*10);
+    else array[4*i+3]= base[i];
   }
+
   //regresa el arreglo de enteros bien encriptado papaps
   return array;
+}
+
+int getInverse(int m, int e){
+  // buscamos un numero tal que e * d mod m = 1
+  printf("\nCalculando la clave inversa para e=%u y m=%u\n", e,m);
+  for(int i = 2 ; i < m; i++){
+    if((i*e)%m == 1) {
+      printf("La clave inversa es %u\n", i);
+      return i;
+    }
+  }
+  return 0;
 }
