@@ -2,15 +2,29 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <primesieve.h>
+#include <time.h>
 
 int* charArrayToIntArray(char* c);
 
-char* intArrayToCharArray(int *c, int);
+char* intArrayToCharArray(int *c, int, int);
+
+int getPrime();
+
+int getLCM(int n1, int n2);
+
+int getE(int);
+
+int getGCD(int n1, int n2);
+
+int* scramble(int* a, int length, int e, int n);
+
 
 int main()
 {
+    srand(time(NULL));
     char cadena[300];
-    scanf("%[^\n]s",cadena);
+    scanf(" %[^\n]s",cadena);
 
     int *intArray = charArrayToIntArray(cadena);
     printf("%s\n","Cadena convertida a numeros: ");
@@ -19,10 +33,24 @@ int main()
     else for(int i=0; i< 2*strlen(cadena)+2; i++) printf("%u", intArray[i]);
 
 
-    char *charArray = intArrayToCharArray(intArray, strlen(cadena));
+    char *charArray = intArrayToCharArray(intArray, strlen(cadena), 2*strlen(cadena)+2);
     printf("%s\n","\nArreglo de numeros convertido a cadena original: ");
     for(int i=0 ; i < strlen(cadena); i++) printf("%c", charArray[i]);
 
+    int p = getPrime();
+    uint64_t q = getPrime();
+    while(p==q) q=getPrime();
+
+    int n = p*q;
+    int m = getLCM(p-1,q-1);
+
+    int e = getE(m);
+
+    int *encryptedNumber = scramble(intArray, 2*strlen(cadena)+2, e, n);
+    printf("%s\n","Cadena encriptadisima ");
+    if(strlen(cadena)%2==0)
+        for(int i=0; i< 2*strlen(cadena); i++) printf("%u", intArray[i]);
+    else for(int i=0; i< 2*strlen(cadena)+2; i++) printf("%u", intArray[i]);
     return 0;
 }
 
@@ -61,14 +89,71 @@ int* charArrayToIntArray(char* c){
     return array;
 }
 
-char* intArrayToCharArray(int *c, int lengthIntArray){
-    char *array = malloc(lengthIntArray * sizeof(char));
+/////////////////////////////////////////////////////////////////////////////
+char* intArrayToCharArray(int *c, int lengthCharArray, int lengthIntArray){
+    char *array = malloc(lengthCharArray * sizeof(char));
 
-    for(int i = 0; i < lengthIntArray; i++){
+    for(int i = 0; i < lengthCharArray; i++){
         if(c[2*i]==2 && c[2*i+1] ==7) array[i] = ' ';
         else array[i] = (char)(64 + c[2*i]*10 + c[2*i+1]);
 
     }
     return array;
+
 }
 
+/////////////////////////////////////////////////////////////////////////////
+int getPrime(){
+  uint64_t start = 60;
+  uint64_t stop = 90;
+  size_t i;
+  size_t size;
+  int* primes =(int*)primesieve_generate_primes(start, stop, &size, INT_PRIMES);
+
+  int r = rand() % size;
+  return primes[r];
+}
+//////////////////////////////////////////////////////////////////////////////
+int getLCM(int n1, int n2){
+    int gcd = getGCD(n1,n2);
+    return (n1*n2)/gcd;
+}
+//////////////////////////////////////////////////////////////////////////////
+
+int getE(int m){
+  int e = rand() % m + 2;
+  while(getGCD(e,m)!=1){
+    e = rand() % m +2;
+  }
+  return e;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+int getGCD(int n1, int n2){
+  int i,gcd;
+  for(i=1; i <= n1 && i <= n2; ++i)
+  {
+    if(n1%i==0 && n2%i==0)
+        gcd = i;
+  }
+  return gcd;
+}
+/// LENGTH ES EL LARGO DEL ARREGLO DE NUMEROS, NO DE BLOQUES.
+int* scramble(int* a, int length, int e, int n){
+  int base[length/4];
+  for(int i = 0 ; i < length/4; i++){
+    base[i] = a[4*i]*1000 + (a[4*i+1]*100) + a[4*i+2]*10 + a[4*i+3];
+    for(int j = 0 ; j < e ; j++) base[j] = (base[j] * base[j]) % n;
+  }
+
+  int *array = malloc(length * sizeof(int));
+  for(int i = 0; i < length/4; i++){
+    array[4*i] = base[i]/1000;
+    array[4*i+1] = (base[i]/100)%(array[4*i]*10);
+    array[4*i+2] = (base[i]/10)%(array[4*i]*100 + array[4*i+1]*10);
+    array[4*i+3] = (base[i]) % (array[4*i]*1000 + array[4*i+1]*100 +
+      array[4*i+2]*10);
+  }
+  //regresa el arreglo de enteros bien encriptado papaps
+  return array;
+}
